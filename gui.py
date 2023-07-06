@@ -3,6 +3,9 @@ import cairo
 from PIL import Image, ImageFont
 import os
 import re
+from pathlib import Path
+import shutil
+import subprocess
 
 # THEME
 ctk.set_appearance_mode("Light")
@@ -19,8 +22,9 @@ telefone = ""
 ext = ""
 
 def mostrar_vista_previa():
+    global surface
     # Cargar la imagen a modificar
-    surface = cairo.ImageSurface.create_from_png("FrenteVacio.png")
+    surface = cairo.ImageSurface.create_from_png("images/FrenteVacio.png")
     # Se crea un contexteo
     context = cairo.Context(surface)
 
@@ -102,9 +106,9 @@ def mostrar_vista_previa():
         context.move_to(x_cellphone, y_cellphone)
         context.show_text(cellphone)
         #icono
-        icono = cairo.ImageSurface.create_from_png("WhatsappIcon.png")
+        icono = cairo.ImageSurface.create_from_png("images/WhatsappIcon.png")
         icono_x = x_cellphone - 25
-        icono_y = y_cellphone - 15
+        icono_y = y_cellphone - 13
        # Dibujar el icono en el contexto como máscara
         context.save()  # Guardar el estado actual del contexto
         context.set_source_surface(icono, icono_x, icono_y)
@@ -238,6 +242,7 @@ root = ctk.CTk()
 root.geometry("954x550")  # WidthxHeight
 root.resizable(False,False)
 root.title("Generador de Firmas")
+root.iconbitmap(r'images/icon.ico')
 
 #-----------------------------------------------------------
 #Validaciones
@@ -284,6 +289,26 @@ def validate_cellphone_input(value_if_allowed):
         return True
     else:
         return False
+    
+user_homefolder = str(Path.home())   
+def save_result():
+    global surface
+    global name
+    first_name_text = name
+    if first_name_text != "":
+        export_firma_folder = (user_homefolder +
+                            '/Downloads/' + first_name_text)
+        export_file_name = first_name_text + ".png"
+        if os.path.exists(export_firma_folder):
+            shutil.rmtree(export_firma_folder)
+        os.makedirs(export_firma_folder)
+        export_front = (export_firma_folder + '/' +
+                        'Frente_' + export_file_name)
+
+        surface.write_to_png(export_front)
+
+        formatted_path = os.path.normpath(export_firma_folder)
+        subprocess.Popen(r'explorer /open,"{}"'.format(formatted_path))
 
 
 #-----------------------------------------------------------
@@ -457,12 +482,18 @@ add_cellphone_button.bind("<Button-1>",  actualizar_cellphone)
 cellphone_field.bind("<Return>", actualizar_cellphone)
 cellphone_field.bind("<Tab>", actualizar_cellphone) 
 
- 
+####################### SAVE ########################################################
+
+button_save = ctk.CTkButton(master=root, text="Guardar", width=50,
+                                 height=32, command=save_result)
+button_save.place(x=650, y=473)
+
+
 
 #-----------------------------------------------------------------------------------------
 # Crear un widget de imagen para mostrar la vista previa
 raw_preview = Image.open(
-    'FrenteVacio.png')
+    'images/FrenteVacio.png')
 
 width, height = 954, 266
 resized_preview = raw_preview.resize((width, height))

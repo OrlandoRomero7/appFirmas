@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 import shutil
 import subprocess
+from validations import *
 
 # THEME
 ctk.set_appearance_mode("Light")
@@ -20,9 +21,12 @@ address_part1 = ""
 address_part2 = ""
 telefone = ""
 ext = ""
+telefoneWithExt = ""
+#nameAndStudies = ""
 
 def mostrar_vista_previa():
     global surface
+    global telefone
     # Cargar la imagen a modificar
     surface = cairo.ImageSurface.create_from_png("images/FrenteVacio.png")
     # Se crea un contexteo
@@ -32,121 +36,114 @@ def mostrar_vista_previa():
     font_path = "Fonts/microsoft_jhenghei.ttf"
     context.select_font_face(font_path)
     context.set_source_rgb(255, 255, 255)  # Color del texto
-
-    # Dibujar el texto con fondo transparente
-    x_name = 705
-    y_name = 40
-    #x_position = 672
-    y_position = 62
-    x_telefone = 680
-    y_telefone = 95
-    x_ext = 810
-    y_ext = 95
-    #x_email = 650
-    
-    #x_cellphone = 680
     
     if cellphone == "":
         x_address_part1 = 622
         y_address_part1 = 145
         #x_address_part2 = 592
         y_address_part2 = 165
-    else:
-        #global x_cellphone
-        
+    else:        
         x_address_part1 = 622
         y_address_part1 = 165
         #x_address_part2 = 592
         y_address_part2 = 185
     
-    #name
+    ################ NAME AND POSITION ##############################
+    cuadro_x = 685
+    cuadro_y = 16
+    cuadro_ancho = 250
+    cuadro_alto = 50
+
+    # Calcular la posición de los textos
     context.set_font_size(19)
-    context.move_to(x_name, y_name)
+    #name_extends = context.text_extents(nameAndStudies)
+    name_extends = context.text_extents(name)
+    context.set_font_size(18)
+    position_extends = context.text_extents(position)
+
+    margen_vertical = (cuadro_alto - (name_extends.height + position_extends.height)) / 2
+
+    name_x = cuadro_x + (cuadro_ancho - name_extends.width) / 2
+    name_y = cuadro_y + margen_vertical + name_extends.height
+
+    position_x = cuadro_x + (cuadro_ancho - position_extends.width) / 2
+    position_y = cuadro_y + margen_vertical + name_extends.height + 20
+
+    # Dibujar el cuadro de texto transparente
+    context.rectangle(cuadro_x, cuadro_y, cuadro_ancho, cuadro_alto)
+    context.set_source_rgba(0, 0, 0, 0)
+    #context.fill()
+
+    # Dibujar los textos centrados dentro del cuadro
+    context.set_source_rgb(255, 255, 255)  # Establecer color del texto
+    #context.set_font_size(19)
+
+    context.move_to(name_x, name_y)
+
     context.show_text(name)
 
-    #POSITION-----------------------------------------
-    # Mide el ancho del texto previo
-    extents = context.text_extents(name)
-    ancho_name = extents.width
-    # Mide el ancho del texto a centrar
-    extents = context.text_extents(position)
-    ancho_position = extents.width
-    # Calcula la posición X para centrar el texto
-    x_position = (x_name + ancho_name/2) - (ancho_position/2)
-    # Dibujar
-    context.set_font_size(18)
-    context.move_to(x_position, y_position)
+    context.move_to(position_x, position_y)
     context.show_text(position)
-    #-------------------------------------------------
+    ##################################################################
 
-    #TELEFONE----------------------------------------
-    context.move_to(x_telefone, y_telefone)
-    context.show_text(telefone)
-    #------------------------------------------------
+    ##########################TELEFONE, EXT, CELLPHONE########################################
 
-    #EXT----------------------------------------
-    context.move_to(x_telefone+130, y_telefone)
-    context.show_text(ext)
-    #------------------------------------------------
+    if cellphone == "":
+        cuadro_tel_x = 645
+        cuadro_tel_y = 70
+        cuadro_tel_ancho = 290
+        cuadro_tel_alto = 50
+    else:
+        cuadro_tel_x = 645
+        cuadro_tel_y = 70
+        cuadro_tel_ancho = 290
+        cuadro_tel_alto = 60
 
-    #CELLPHONE--------------------------------------
-    if telefone != "" and cellphone != "":
-        y_cellphone = 115
-        # Mide el ancho del texto previo
-        extents = context.text_extents(telefone)
-        extents2 = context.text_extents(ext)
-        ancho_telefone = extents.width + extents2.width
-        # Mide el ancho del texto a centrar
-        extents = context.text_extents(cellphone)
-        ancho_cellphone = extents.width
-        # Calcula la posición X para centrar el texto
-        x_cellphone = (x_telefone + ancho_telefone/2) - (ancho_cellphone/2)
-        
-        #Dibujar
-        context.move_to(x_cellphone, y_cellphone)
-        context.show_text(cellphone)
+    telefone_extents = context.text_extents(telefone+ext)
+    email_extents = context.text_extents(email)
+    cellphone_extents = context.text_extents(cellphone)
+
+    margen_vertical_tel = (cuadro_tel_alto - (telefone_extents.height + email_extents.height + cellphone_extents.height)) / 2
+
+    #telefone
+    telefone_x = cuadro_tel_x + (cuadro_tel_ancho - telefone_extents.width) / 2
+    telefone_y = cuadro_tel_y + margen_vertical_tel + telefone_extents.height
+
+    if cellphone == "":
+        #email
+        email_x = cuadro_tel_x + (cuadro_tel_ancho - email_extents.width) / 2
+        email_y = cuadro_tel_y + margen_vertical_tel + telefone_extents.height + 20
+    else:
         #icono
         icono = cairo.ImageSurface.create_from_png("images/WhatsappIcon.png")
-        icono_x = x_cellphone - 25
-        icono_y = y_cellphone - 13
-       # Dibujar el icono en el contexto como máscara
+        #cellphone
+        cellphone_x = cuadro_tel_x + (cuadro_tel_ancho - cellphone_extents.width) / 2
+        cellphone_y = cuadro_tel_y + margen_vertical_tel + telefone_extents.height + 20
+        icono_x = cellphone_x - 25
+        icono_y = cellphone_y - 15
+        # Dibujar el icono en el contexto como máscara
         context.save()  # Guardar el estado actual del contexto
         context.set_source_surface(icono, icono_x, icono_y)
         context.paint_with_alpha(1)  # Utilizar la imagen como máscara con opacidad completa
-        context.restore()  # Restaurar el estado del contexto
-    #-------------------------------------------------
+        context.restore()  # Restaurar el estado del contexto 
+        #email
+        email_x = cuadro_tel_x + (cuadro_tel_ancho - email_extents.width) / 2
+        email_y = cuadro_tel_y + margen_vertical_tel + cellphone_extents.height + 40
 
-    #EMAIL-------------------------------------------
+    context.rectangle(cuadro_tel_x, cuadro_tel_y, cuadro_tel_ancho, cuadro_tel_alto)
+    context.set_source_rgba(0, 0, 0, 0)
+
+    context.set_source_rgb(255, 255, 255)
+    context.move_to(telefone_x, telefone_y)
+    context.show_text(telefone+ext)
     if cellphone != "":
-        y_email = 135
-        # Mide el ancho del texto previo
-        extents = context.text_extents(cellphone)
-        ancho_cellphone = extents.width
-        # Mide el ancho del texto a centrar
-        extents = context.text_extents(email)
-        ancho_email = extents.width
-        # Calcula la posición X para centrar el texto
-        x_email = (x_cellphone + ancho_cellphone/2) - (ancho_email/2)
-        context.move_to(x_email, y_email)
-    else:
-        y_email = 110
-        # Mide el ancho del texto previo
-        extents = context.text_extents(telefone) 
-        extents2 = context.text_extents(ext) 
-        ancho_telefone = extents.width + extents2.width
-        # Mide el ancho del texto a centrar
-        extents = context.text_extents(email)
-        ancho_email = extents.width
-        # Calcula la posición X para centrar el texto
-        x_email = (x_telefone + ancho_telefone/2) - (ancho_email/2)
-        context.move_to(x_email, y_email)
+        context.move_to(cellphone_x, cellphone_y)
+    context.show_text(cellphone)
+    if error_label.cget("text") == "":
+        context.move_to(email_x, email_y)
+        context.show_text(email)
 
-    #Dibujar
-    
-    context.show_text(email)
-    #-----------------------------------------------
-
-    #ADDRESS-------------------------------------------
+    ###################### ADDRESS ########################################################
     #address_part1
     context.set_font_size(17)
     context.move_to(x_address_part1, y_address_part1)
@@ -176,6 +173,8 @@ def mostrar_vista_previa():
     converted_preview = ctk.CTkImage(resized_preview, size=(954, 266))
     firma_preview.configure(root, image=converted_preview, text=None)
 
+##########################################################################################################################
+
 # Funciones para actualizar los textos de los campos
 def actualizar_name(event):
     global name
@@ -189,7 +188,6 @@ def actualizar_name(event):
         position_field.configure(state="disabled")
     mostrar_vista_previa()
 
-
 def actualizar_position(event):
     global position
     global name
@@ -200,13 +198,11 @@ def actualizar_position(event):
 
 def actualizar_ext(event):
     global ext
-    global telefone
-    
     ext = ext_field.get()
-    ext = "  " + "Ext." + ext
-    #telefone = telefone + "  " + "Ext." + ext
-    mostrar_vista_previa()
-
+    if ext != "":
+        ext = " ext." + ext
+        mostrar_vista_previa()
+    
 def actualizar_email(event):
     global email
     global telefone
@@ -228,7 +224,7 @@ def actualizar_addressAndTelefone(event):
     global telefone
     address_part1 = address_part1
     address_part2 = address_part2
-    telefone = telefone
+    #telefone = telefone
     if telefone != "":
         email_field.configure(state="normal")
         ext_field.configure(state="normal")
@@ -245,34 +241,7 @@ root.title("Generador de Firmas")
 root.iconbitmap(r'images/icon.ico')
 
 #-----------------------------------------------------------
-#Validaciones
-
-def validate_name_input(value_if_allowed):
-    if len(value_if_allowed) <= 26 and all(c.isalpha() or c.isspace() or c == '.' for c in value_if_allowed):
-        return True
-    else:
-        return False
-
-def validate_position_input(value_if_allowed):
-    if len(value_if_allowed) <= 29 and all(c.isalpha() or c.isspace() for c in value_if_allowed):
-        return True
-    else:
-        return False
-    
-def validate_ext_input(value_if_allowed):
-    if value_if_allowed == "":
-        return True
-    elif value_if_allowed.isdigit() and len(value_if_allowed) <= 3:
-        return True
-    else:
-        return False
-
-def validate_email_input(value_if_allowed):
-    allowed_chars = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@')
-    if set(value_if_allowed).issubset(allowed_chars):
-        return True
-    else:
-        return False
+#Validaciones / toda estan en otro archivo excepto esta 
 
 def validate_email():
     email_regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$'
@@ -282,14 +251,8 @@ def validate_email():
     else:
         error_label.configure(text="")
 
-def validate_cellphone_input(value_if_allowed):
-    if value_if_allowed == "":
-        return True
-    elif value_if_allowed.isdigit() and len(value_if_allowed) <= 10:
-        return True
-    else:
-        return False
-    
+
+#Guardar Imagen en carpeta de descargas con el nombre de la persona    
 user_homefolder = str(Path.home())   
 def save_result():
     global surface
@@ -310,10 +273,8 @@ def save_result():
         formatted_path = os.path.normpath(export_firma_folder)
         subprocess.Popen(r'explorer /open,"{}"'.format(formatted_path))
 
-
-#-----------------------------------------------------------
-
-# ----------------------------------------------
+#######################################################################
+#Formatos de nombre y celular
 
 def custom_title(s):
     no_capitalize = ["y", "e", "o", "u", "de"]
@@ -329,7 +290,6 @@ def format_cellphone(cellphone):
     digits = ''.join(filter(str.isdigit, cellphone))
     formatted_number = f"({digits[:3]}) {digits[3:6]}.{digits[6:10]}"
     return formatted_number
-
 
 def city_select(city):
     global address_part1,address_part2,telefone
@@ -385,7 +345,6 @@ add_firstname_button.bind("<Button-1>",  actualizar_name)
 name_field.bind("<Return>", actualizar_name)
 name_field.bind("<Tab>", actualizar_name)
 
-
 #--------------------------------------------------------------
 ########################## POSITION ####################################################3
 
@@ -398,8 +357,6 @@ position_field = ctk.CTkEntry(
 position_field.place(x=350, y=353,)
 position_field.configure(validate="key", state="disabled",
                          validatecommand=(root.register(validate_position_input), '%P'))
-
-
 
 # Crear un botón para mostrar la vista previa del segundo campo
 add_position_button = ctk.CTkButton(
@@ -422,8 +379,6 @@ ext_field = ctk.CTkEntry(
 ext_field.place(x=350, y=393,)
 ext_field.configure(validate="key", state="disabled",
                          validatecommand=(root.register(validate_ext_input), '%P'))
-
-
 
 # Crear un botón para mostrar la vista previa del segundo campo
 add_ext_button = ctk.CTkButton(
@@ -449,7 +404,6 @@ email_field.configure(validate="key",state="disabled",
                          validatecommand=(root.register(validate_email_input), '%P'))
 error_label = ctk.CTkLabel(root, text="",text_color="#FF0000")
 error_label.place(x=580, y=433)
-
 
 # Crear un botón para mostrar la vista previa del segundo campo
 add_email_button = ctk.CTkButton(
@@ -487,8 +441,6 @@ cellphone_field.bind("<Tab>", actualizar_cellphone)
 button_save = ctk.CTkButton(master=root, text="Guardar", width=50,
                                  height=32, command=save_result)
 button_save.place(x=650, y=473)
-
-
 
 #-----------------------------------------------------------------------------------------
 # Crear un widget de imagen para mostrar la vista previa

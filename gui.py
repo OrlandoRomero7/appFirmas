@@ -37,17 +37,6 @@ def mostrar_vista_previa():
     context.select_font_face(font_path)
     context.set_source_rgb(255, 255, 255)  # Color del texto
     
-    if cellphone == "":
-        x_address_part1 = 622
-        y_address_part1 = 145
-        #x_address_part2 = 592
-        y_address_part2 = 165
-    else:        
-        x_address_part1 = 622
-        y_address_part1 = 165
-        #x_address_part2 = 592
-        y_address_part2 = 185
-    
     ################ NAME AND POSITION ##############################
     cuadro_x = 685
     cuadro_y = 16
@@ -84,7 +73,7 @@ def mostrar_vista_previa():
 
     context.move_to(position_x, position_y)
     context.show_text(position)
-    ##################################################################
+   
 
     ##########################TELEFONE, EXT, CELLPHONE########################################
 
@@ -93,11 +82,22 @@ def mostrar_vista_previa():
         cuadro_tel_y = 70
         cuadro_tel_ancho = 290
         cuadro_tel_alto = 50
+        #cuadro address
+        cuadro_addr_x = 580
+        cuadro_addr_y = 125
+        cuadro_addr_ancho = 330
+        cuadro_addr_alto = 50
     else:
         cuadro_tel_x = 645
         cuadro_tel_y = 70
         cuadro_tel_ancho = 290
         cuadro_tel_alto = 60
+        #cuadro address
+        cuadro_addr_x = 580
+        cuadro_addr_y = 135
+        cuadro_addr_ancho = 330
+        cuadro_addr_alto = 50
+
 
     telefone_extents = context.text_extents(telefone+ext)
     email_extents = context.text_extents(email)
@@ -144,23 +144,28 @@ def mostrar_vista_previa():
         context.show_text(email)
 
     ###################### ADDRESS ########################################################
-    #address_part1
     context.set_font_size(17)
-    context.move_to(x_address_part1, y_address_part1)
+    address_part1_extents = context.text_extents(address_part1)
+    address_part2_extents = context.text_extents(address_part2)
+
+    margen_vertical_address = (cuadro_addr_alto - (address_part1_extents.height + address_part2_extents.height)) / 2
+
+    address_part1_x = cuadro_addr_x + (cuadro_addr_ancho - address_part1_extents.width) / 2
+    address_part1_y = cuadro_addr_y + margen_vertical_address+ address_part1_extents.height
+
+    address_part2_x = cuadro_addr_x + (cuadro_addr_ancho - address_part2_extents.width) / 2
+    address_part2_y = cuadro_addr_y + margen_vertical_address+ address_part1_extents.height + 20
+
+    context.rectangle(cuadro_addr_x, cuadro_addr_y, cuadro_addr_ancho, cuadro_addr_alto)
+    context.set_source_rgba(0, 0, 0, 0)
+    context.set_source_rgb(255, 255, 255)
+    
+    
+    context.move_to(address_part1_x, address_part1_y)
     context.show_text(address_part1)
-    # Mide el ancho del texto previo
-    extents = context.text_extents(address_part1)
-    ancho_address_part1 = extents.width
-    # Mide el ancho del texto a centrar
-    extents = context.text_extents(address_part2)
-    ancho_address_part2 = extents.width
-    # Calcula la posición X para centrar el texto
-    x_address_part2 = (x_address_part1 + ancho_address_part1/2) - (ancho_address_part2/2)
-    #Dibujar
-    #address_part2
-    context.move_to(x_address_part2, y_address_part2)
+
+    context.move_to(address_part2_x, address_part2_y)
     context.show_text(address_part2)
-    #-------------------------------------------------
 
     # Guardar la imagen modificada
     surface.write_to_png("imagen_modificada.png")
@@ -251,7 +256,6 @@ def validate_email():
     else:
         error_label.configure(text="")
 
-
 #Guardar Imagen en carpeta de descargas con el nombre de la persona    
 user_homefolder = str(Path.home())   
 def save_result():
@@ -280,11 +284,18 @@ def custom_title(s):
     no_capitalize = ["y", "e", "o", "u", "de"]
     words = s.split(' ')
     for i in range(len(words)):
-        if words[i].lower() not in no_capitalize or i == 0:  # Convertimos la palabra a minúsculas antes de verificar
+        if words[i].lower() not in no_capitalize or i == 0:
             words[i] = words[i].capitalize()
         else:
-            words[i] = words[i].lower()  # Convertimos la palabra a minúsculas si está en la lista
+            words[i] = words[i].lower()
+
+        if '.' in words[i]:
+            words[i] = words[i].upper()
+            if i < len(words) - 1:
+                words[i + 1] = words[i + 1].capitalize()
+
     return ' '.join(words)
+
 
 def format_cellphone(cellphone):
     digits = ''.join(filter(str.isdigit, cellphone))

@@ -206,7 +206,8 @@ def actualizar_ext(event):
     ext = ext_field.get()
     if ext != "":
         ext = " ext." + ext
-        mostrar_vista_previa()
+        
+    mostrar_vista_previa()
     
 def actualizar_email(event):
     global email
@@ -382,7 +383,7 @@ position_field.bind("<Tab>", actualizar_position)
 ########################## EXT ####################################################3
 
 ext_CTkLabel = ctk.CTkLabel(
-    root, text="Ext.:", font=("NotoSans-Bold", 20, "bold"), text_color="#595959")
+    root, text="Ext:", font=("NotoSans-Bold", 20, "bold"), text_color="#595959")
 ext_CTkLabel.place(x=256, y=392,)
 
 ext_field = ctk.CTkEntry(

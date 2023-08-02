@@ -38,10 +38,15 @@ def mostrar_vista_previa():
     context.set_source_rgb(255, 255, 255)  # Color del texto
     
     ################ NAME AND POSITION ##############################
-    cuadro_x = 685
-    cuadro_y = 16
-    cuadro_ancho = 250
-    cuadro_alto = 50
+    cuadro_name_x = 685
+    cuadro_name_y = 14
+    cuadro_name_ancho = 250
+    cuadro_name_alto = 25
+
+    cuadro_position_x = 685
+    cuadro_position_y = 35
+    cuadro_position_ancho = 250
+    cuadro_position_alto = 25
 
     # Calcular la posición de los textos
     context.set_font_size(19)
@@ -50,27 +55,29 @@ def mostrar_vista_previa():
     context.set_font_size(18)
     position_extends = context.text_extents(position)
 
-    margen_vertical = (cuadro_alto - (name_extends.height + position_extends.height)) / 2
+    margen_vertical_name = cuadro_name_alto - name_extends.height
 
-    name_x = cuadro_x + (cuadro_ancho - name_extends.width) / 2
-    name_y = cuadro_y + margen_vertical + name_extends.height
+    name_x = cuadro_name_x + (cuadro_name_ancho - name_extends.width) / 2
+    name_y = cuadro_name_y + margen_vertical_name + name_extends.height
 
-    position_x = cuadro_x + (cuadro_ancho - position_extends.width) / 2
-    position_y = cuadro_y + margen_vertical + name_extends.height + 20
+    margen_vertical_position = cuadro_position_alto - position_extends.height
+
+    position_x = cuadro_position_x + (cuadro_position_ancho - position_extends.width) / 2
+    position_y = cuadro_position_y + margen_vertical_position + position_extends.height
 
     # Dibujar el cuadro de texto transparente
-    context.rectangle(cuadro_x, cuadro_y, cuadro_ancho, cuadro_alto)
-    context.set_source_rgba(0, 0, 0, 0)
+    #context.rectangle(cuadro_name_x, cuadro_name_y, cuadro_name_ancho, cuadro_name_alto)
+    #context.set_source_rgba(0, 0, 0, 1)
     #context.fill()
 
     # Dibujar los textos centrados dentro del cuadro
     context.set_source_rgb(255, 255, 255)  # Establecer color del texto
     #context.set_font_size(19)
 
+    context.set_font_size(19)
     context.move_to(name_x, name_y)
-
     context.show_text(name)
-
+    context.set_font_size(18)
     context.move_to(position_x, position_y)
     context.show_text(position)
    

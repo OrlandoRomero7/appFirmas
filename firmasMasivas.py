@@ -8,8 +8,8 @@ import numpy as np
 
 
 #Leer excel de operativo
-ruta_archivo = "EmpleadosFirmasTijuana.xlsx"
-nombre_hoja = "Tijuana"
+ruta_archivo = "EmpleadosFirmasEnsenada.xlsx"
+nombre_hoja = "Operativo"
 datos_excel = pd.read_excel(ruta_archivo, sheet_name=nombre_hoja, usecols=[1, 2, 4, 5, 6, 7])
 
 #Se indica a que columna correspondra cada varaible
@@ -27,10 +27,10 @@ name = ""
 position = ""
 email = ""
 cellphone = ""
-#address_part1 = "Blvd. Teniente Azueta #130 int. 210"
-#address_part2 = "Recinto Portuario, Ensenada B.C. C.P. 22800"
-address_part1 = "Av. Alejandro Von Humboldt 17618-Int. B,"
-address_part2 = "Garita de Otay, 22430 Tijuana, B.C."
+address_part1 = "Blvd. Teniente Azueta #130 int. 210"
+address_part2 = "Recinto Portuario, Ensenada B.C. C.P. 22800"
+""" address_part1 = "Av. Alejandro Von Humboldt 17618-Int. B,"
+address_part2 = "Garita de Otay, 22430 Tijuana, B.C." """
 telefone = ""
 num_ensenada = "(646) 175.7732"
 num_tijuana = "(664) 624.8323"
@@ -46,49 +46,55 @@ def mostrar_vista_previa():
     surface = cairo.ImageSurface.create_from_png("images/FrenteVacio.png")
     # Se crea un contexteo
     context = cairo.Context(surface)
-
     # Configurar la fuente y el texto
     font_path = "Fonts/microsoft_jhenghei.ttf"
     context.select_font_face(font_path)
     context.set_source_rgb(255, 255, 255)  # Color del texto
-    
+
     ################ NAME AND POSITION ##############################
-    cuadro_x = 685
-    cuadro_y = 14
-    cuadro_ancho = 250
-    cuadro_alto = 60
+
+    cuadro_name_x = 685
+    cuadro_name_y = 14
+    cuadro_name_ancho = 250
+    cuadro_name_alto = 25
+
+    cuadro_position_x = 685
+    cuadro_position_y = 35
+    cuadro_position_ancho = 250
+    cuadro_position_alto = 25
 
     # Calcular la posición de los textos
     context.set_font_size(19)
+    #name_extends = context.text_extents(nameAndStudies)
     name_extends = context.text_extents(nameAndStudies)
-    #context.set_font_size(18)
+    context.set_font_size(18)
     position_extends = context.text_extents(position)
 
-    margen_vertical = (cuadro_alto - (name_extends.height + position_extends.height)) / 2
+    margen_vertical_name = cuadro_name_alto - name_extends.height
 
-    name_x = cuadro_x + (cuadro_ancho - name_extends.width) / 2
-    name_y = cuadro_y + margen_vertical + name_extends.height
+    name_x = cuadro_name_x + (cuadro_name_ancho - name_extends.width) / 2
+    name_y = cuadro_name_y + margen_vertical_name + name_extends.height
 
-    position_x = cuadro_x + (cuadro_ancho - position_extends.width) / 2
-    position_y = cuadro_y + margen_vertical + name_extends.height + 20
+    margen_vertical_position = cuadro_position_alto - position_extends.height
 
-    # Dibujar el cuadro de texto transparente
-    #context.rectangle(cuadro_x, cuadro_y, cuadro_ancho, cuadro_alto)
-    #context.set_source_rgba(0, 0, 0, 0)
-    #context.fill()
+    position_x = cuadro_position_x + (cuadro_position_ancho - position_extends.width) / 2
+    position_y = cuadro_position_y + margen_vertical_position + position_extends.height
+
+    """ # Dibujar el cuadro de texto transparente
+    context.rectangle(cuadro_x, cuadro_y, cuadro_ancho, cuadro_alto)
+    context.set_source_rgba(0, 0, 0, 1)
+    context.fill() """
 
     # Dibujar los textos centrados dentro del cuadro
     context.set_source_rgb(255, 255, 255)  # Establecer color del texto
     
-
-    #context.set_font_size(19)
-    #context.set_font_size(19)
+    context.set_font_size(19)
     context.move_to(name_x, name_y)
     context.show_text(nameAndStudies)
 
     context.set_font_size(18)
     context.move_to(position_x, position_y)
-    context.show_text(position)
+    context.show_text(position) 
 
     ##########################TELEFONE, EXT, CELLPHONE########################################
     # Dimensiones Cuadro de texto telefono, correo, celular y address
@@ -113,15 +119,15 @@ def mostrar_vista_previa():
         cuadro_addr_ancho = 330
         cuadro_addr_alto = 50
 
-    """ if ext == "":
+    if ext == "":
         telefone = num_ensenada
     else:
-        telefone = num_ensenada + " ext." + ext """
+        telefone = num_ensenada + " ext." + ext 
 
-    if ext == "":
+    """ if ext == "":
         telefone = num_tijuana
     else:
-        telefone = num_tijuana + " ext." + ext 
+        telefone = num_tijuana + " ext." + ext  """
 
     telefone_extents = context.text_extents(telefone)
     email_extents = context.text_extents(email)
@@ -200,11 +206,18 @@ def custom_title(s):
     no_capitalize = ["y", "e", "o", "u", "de"]
     words = s.split(' ')
     for i in range(len(words)):
-        if words[i].lower() not in no_capitalize or i == 0:  # Convertimos la palabra a minúsculas antes de verificar
-            words[i] = words[i].capitalize()
+        word = words[i]
+        if "-" in word:
+            hyphen_index = word.index("-")
+            first_part = word[:hyphen_index].capitalize()
+            second_part = word[hyphen_index + 1:].capitalize()
+            words[i] = f"{first_part}-{second_part}"
+        elif word.lower() not in no_capitalize or i == 0:
+            words[i] = word.capitalize()
         else:
-            words[i] = words[i].lower()  # Convertimos la palabra a minúsculas si está en la lista
+            words[i] = word.lower()
     return ' '.join(words)
+
 
 
 def format_cellphone(cellphone):
@@ -216,7 +229,7 @@ def format_cellphone(cellphone):
 user_homefolder = str(Path.home()) 
 def save_result():
     global surface
-    global name
+    global name,position
     first_name_text = name
     if first_name_text != "":
         operavio_folder = os.path.join(user_homefolder, 'Downloads', nombre_hoja)
@@ -227,10 +240,13 @@ def save_result():
         export_front = os.path.join(export_firma_folder, 'Frente_' + export_file_name)
         surface.write_to_png(export_front)
 
+    
+
 # Recorre cada fila y los valores se le asignan a las varaibles locales que son las que se insertan en la imagen
 for nom, ape, pue, ex, co, celu, carre in zip(nombre, primer_apellido, puesto, extension, correo, celular, carrera):
+    
     name = nom + " " + ape
-    name = custom_title(name)
+    name = custom_title(str(name))
     studies = str(carre)
     if studies == "nan": 
         studies = ""
@@ -255,3 +271,7 @@ for nom, ape, pue, ex, co, celu, carre in zip(nombre, primer_apellido, puesto, e
         cellphone = format_cellphone(cellphone)
     mostrar_vista_previa()
     save_result()
+    name = ""
+    position = ""
+    
+
